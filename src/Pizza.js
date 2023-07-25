@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
+import * as yup from 'yup'
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+
+
+const schema = yup.object().shape({
+  name: yup.string().required('We need your name!').min(2, 'name must be at least 2 characters'),
+  size: yup.string()
+})
 
 const initialFormValues = {
   name: '',
@@ -11,13 +18,21 @@ const initialFormValues = {
 }
 
 const Pizza = () => {
-  
   const [formValues, setFormValues] = useState(initialFormValues)
+  const [errors, setErrors] = useState(initialFormValues)
+  const [disabled, setDisabled] = useState(true);
   
+const setFormErrors = (name, value) => {
+  yup.reach(schema, name).validate(value)
+  .then(() => setErrors({ ...errors, [name]: '' }))
+  .catch(err => setErrors({ ...errors, [name]: err.errors[0] }))
+}
+
   const onChange = evt => {
     const { name, value } = evt.target
     setFormValues({ ...formValues, [name]: value })
-    console.log(formValues)}
+    setFormErrors(name, value)
+    }
 
 const onChangeCheck = evt => {
   const name = evt.target.name
@@ -29,6 +44,9 @@ const onChangeCheck = evt => {
   
     return (
       <form id="pizza-form">
+        <div style={{ color: 'red' }}>
+          <div>{errors.name}</div>
+        </div>
         <input 
           name='name'
           type='text'
@@ -82,6 +100,21 @@ const onChangeCheck = evt => {
             onChange={onChangeCheck}
             checked={formValues.chicken}
           />Grilled Chicken
+          </label>
+          <label>
+            <input 
+              type='text'
+              name='special'
+              id='special-text'
+            />
+            Anything special?
+          </label>
+          <label>
+            <input 
+            type="submit"
+            name='submit'
+            id="order-button"
+            />
           </label>
         </div>
 
